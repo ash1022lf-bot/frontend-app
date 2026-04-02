@@ -9,6 +9,7 @@ phases:
 
   build:
     commands:
+      - export NODE_OPTIONS=--openssl-legacy-provider
       - npm run build
 
 artifacts:
