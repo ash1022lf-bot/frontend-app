@@ -1,18 +1,26 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      nodejs: 18
+  pre_build:
     commands:
-      - npm install
+      - echo Logging in to Amazon ECR...
+      - AWS_ACCOUNT_ID=254652354481
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/webap-repo
+      - IMAGE_TAG=latest
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
 
   build:
     commands:
-      - export NODE_OPTIONS=--openssl-legacy-provider
-      - npm run build
+      - echo Build started on `date`
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - printf '[{"name":"webap-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
-  base-directory: dist
   files:
-    - '**/*'
+    - imagedefinitions.json
