@@ -12,6 +12,8 @@ RUN npm run build -- --configuration production
 # Stage 2: serve with nginx
 FROM nginx:alpine
 
+RUN rm -rf /usr/share/nginx/html/*
+
 COPY --from=build /app/dist/shop /usr/share/nginx/html
 
 EXPOSE 80
